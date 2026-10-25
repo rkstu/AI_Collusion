@@ -1,0 +1,42 @@
+{
+ "cross_run_mi_H": [
+  0.3692,
+  0.0182,
+  true
+ ],
+ "cross_run_mi_M": [
+  0.3023,
+  0.0007,
+  true
+ ],
+ "permutation_invariance_H": [
+  0.7137,
+  0.5,
+  false
+ ],
+ "permutation_invariance_M": [
+  0.5334,
+  0.5,
+  false
+ ],
+ "watermark_variance_H": [
+  0.0,
+  0.5,
+  false
+ ],
+ "watermark_variance_M": [
+  0.0,
+  0.5,
+  false
+ ],
+ "linguistic_steganalysis_H": [
+  7103.0219,
+  0.0091,
+  false
+ ],
+ "linguistic_steganalysis_M": [
+  6198.6387,
+  0.0101,
+  false
+ ]
+}

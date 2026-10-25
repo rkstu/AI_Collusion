@@ -1,0 +1,8 @@
+__pycache__/
+.env
+archive/
+data/
+paper/*.aux
+paper/*.log
+paper/*.out
+results/transcripts/

@@ -1,0 +1,18 @@
+diff --git a/llm-agent-collusion/src/resources/model_wrappers.py b/llm-agent-collusion/src/resources/model_wrappers.py
+index 7dd18d5..d7db7eb 100644
+--- a/llm-agent-collusion/src/resources/model_wrappers.py
++++ b/llm-agent-collusion/src/resources/model_wrappers.py
+@@ -98,6 +98,13 @@ class OpenRouterClient(ModelWrapper):
+ 
+     def generate(self, messages: List[Message]) -> Optional[str]:
+         params = dict(self.additional_params)
++        # [AI_Collusion patch] pin OpenRouter provider(s) via env, e.g. OR_PROVIDER_ORDER=OpenAI
++        # OR_PROVIDER_ORDER="openai/=OpenAI;anthropic/=Anthropic" maps model-id prefix -> provider
++        for rule in filter(None, os.getenv("OR_PROVIDER_ORDER", "").split(";")):
++            prefix, _, prov = rule.rpartition("=")
++            if self.model_name.startswith(prefix):
++                params["extra_body"] = {"provider": {"order": prov.split(","), "allow_fallbacks": False}}
++                break
+         for attempt in range(self.max_retries):
+             try:
+                 response = self.client.chat.completions.create(
