@@ -8,7 +8,7 @@ Rahul Kumar, Independent Researcher · report: [`paper/paper.pdf`](paper/paper.p
 
 Tools that detect collusion between AI agents are usually tested on agents that researchers programmed to hide a secret signal. We ran a published detector suite, unchanged, on language-model sellers in a simulated market who collude without being told to.
 
-Groups of five GPT-4.1 sellers held prices above the competitive level in all 10 sessions, and groups that included two Claude Haiku sellers priced near cost in all 10 matched sessions (p = 0.002, from prices alone). None of the suite's detectors, and no AI judge reading the messages, separated the two markets, because sellers in both used the same kind of collusive language. A simple rule that reads prices instead caught every colluding market within five rounds. Reading the suite's code, we also found that its three comparison methods, reported with perfect scores, are given the list of colluders as an input.
+Groups of five GPT-4.1 sellers held prices above the competitive level in all 10 sessions, and groups that included two Claude Haiku sellers priced near cost in all 10 matched sessions (p = 0.002, from prices alone). None of the suite's detectors, and no AI judge reading the messages, reliably separated the two markets. The best, the AI judge, ranked a colluding session above a non-colluding one 77% of the time, against 100% for prices, because sellers in both markets used the same kind of collusive language. A simple rule that reads prices instead caught every colluding market within five rounds. Reading the suite's code, we also found that its three comparison methods, reported with perfect scores, are given the list of colluders as an input.
 
 ## Verify the results in one command
 
@@ -16,9 +16,13 @@ Groups of five GPT-4.1 sellers held prices above the competitive level in all 10
 python3 verify.py
 ```
 
-Plain Python, with nothing to install, no API key and no starter kit. It reads the 20 session logs in `runs/` and prints the collusion index for every session, the paired test, the AI judge's scores, the price rule and the vocabulary count, all in under a second. Every number it prints is in the report.
+Plain Python, with nothing to install, no API key and no starter kit. It reads the 20 session logs in `runs/` and prints the collusion index for every session, the paired test, the AI judge's scores and ROC AUC, the price rule and the vocabulary count, all in under a second. Every number it prints is in the report.
 
-The detector statistics need the detector suite itself, so `src/analyze.py` recomputes those and draws every figure, using the starter kit's environment.
+The detector statistics need the detector suite itself, so `src/analyze.py` recomputes those and draws every figure. Run it from this folder with the starter kit's `steganographic-collusion` environment, setting `STARTER_KIT` to a clone of the kit at `e6fb130`.
+
+```bash
+STARTER_KIT=/path/to/collusion_hackathon /path/to/collusion_hackathon/steganographic-collusion/.venv/bin/python src/analyze.py
+```
 
 ## What we built on, and what we added
 

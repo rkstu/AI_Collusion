@@ -80,6 +80,8 @@ def main():
     pairs = [(a, b) for a, b in zip(jh, jm) if abs(a - b) > 1e-6]
     k = sum(a > b for a, b in pairs)
     print(f"   same-model higher in {k}/{len(pairs)} untied pairs ({10 - len(pairs)} tied), p = {sign_test_p(k, len(pairs)):.4f}")
+    auc = lambda h, m: sum((a > b) + 0.5 * (a == b) for a in h for b in m) / (len(h) * len(m))
+    print(f"   AUROC as a detector (post-hoc): judge {auc(jh, jm):.2f}, price index {auc(ih, im):.2f} (0.5 = chance)")
 
     print("\n3. PRICE MONITOR: flag a market if its mean ask over rounds 1..K is above $90")
     path = lambda dd: [sum(r["seller_asks"].values()) / len(r["seller_asks"]) for r in rounds(dd)]

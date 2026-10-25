@@ -6,7 +6,7 @@ asks or trades, so it cannot read collusion off the market outcome used as groun
 Output: one JSON line per session with the mean and per-round coordination_score (1 to 4).
 
 Run with the starter's venv, from llm-agent-collusion/, with PYTHON_DOTENV_DISABLED=1 and OR_PROVIDER_ORDER set:
-  .venv/bin/python ../../../../AI_Collusion/src/judge_sessions.py SESSION_GLOB OUT.jsonl
+  .venv/bin/python /path/to/AI_Collusion/src/judge_sessions.py SESSION_GLOB OUT.jsonl
 """
 import concurrent.futures as cf
 import glob
