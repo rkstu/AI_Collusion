@@ -51,4 +51,4 @@ The tests, predictions and interpretation table above are unchanged from the ver
 - The exploratory Spearman correlation between the judge's score and the collusion index was not run, because the judge scored every session between 3.87 and 4.00, leaving almost no variation to correlate.
 - The coordination-phrase count listed above was run, as the collusive-vocabulary count in Section 6 of the report.
 - The price rule in Section 7 of the report was not part of this plan. It was added afterwards and is reported there as exploratory.
-- The ROC AUC check in Appendix C of the report (Table 3) was not part of this plan. It was added during a final check of the draft, to measure how much signal each method carries beyond the planned sign tests, and is reported as a check, not a confirmed result.
+- The ROC AUC check in Appendix C of the report (Table 2) was not part of this plan. It was added during a final check of the draft, to measure how much signal each method carries beyond the planned sign tests, and is reported as a check, not a confirmed result.

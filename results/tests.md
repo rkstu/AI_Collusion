@@ -8,6 +8,12 @@
 
 exploratory vocabulary (per 1,000 words, GPT seats): same-model mean 123.5 [101.9-148.4], mixed mean 113.5 [97.2-146.1], higher in same-model 7/10 pairs, sign-flip p = 0.0820
 
+writing-style check, cross_run_mi pooled per market (statistic, p)
+| sellers scored | same-model | mixed |
+|---|---|---|
+| all five | 0.2726, p = 0.0240 | 0.1943, p = 0.1622 |
+| GPT-4.1 only | 0.3692, p = 0.0182 | 0.3023, p = 0.0007 |
+
 post-hoc AUROC (not pre-registered); 0.5 = chance, 1.0 = perfect
 | method | AUROC | 95% bootstrap CI | one-sided permutation p |
 |---|---|---|---|

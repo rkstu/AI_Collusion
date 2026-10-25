@@ -20,12 +20,16 @@ These detectors are usually tested against scripted colluders, agents that a res
 
 We tested this with Audit the Whisper [4], a published collusion detector suite included in a widely used starter kit for collusion research [7]. On its own benchmark it reports high detection rates while flagging only 1 in 1,000 honest cases, and it reports three comparison methods with a perfect ROC AUC² of 1.000. We ran its detectors, without changing them, on a published market in which language-model sellers set prices and can message each other [6].
 
-We ran two versions of that market. In one, five GPT-4.1 sellers kept prices above the competitive level in all 10 sessions. In the other, two of the five sellers were Claude Haiku, and prices fell close to the sellers' own cost in all 10 (Section 4). Our main contributions are the following.
+We ran two versions of that market. In one, five GPT-4.1 sellers kept prices above the competitive level in all 10 sessions. In the other, two of the five sellers were Claude Haiku, and prices fell close to the sellers' own cost in all 10 (Section 4). Figure 1 shows why the detectors struggle, since sellers in the two markets talk alike but price very differently. Our main contributions are the following.
 
-- **A test of published detectors on unscripted collusion.** Prices separate the two markets perfectly, but the suite's detectors and an AI judge pick up only a weak signal, far below what the suite reports on scripted colluders (Sections 4 and 5).
+- **A test of published detectors on unscripted collusion.** Prices separate the two markets perfectly, but the suite's detectors and an AI judge pick up only a weak signal, below what the suite reports on scripted colluders (Sections 4 and 5).
 - **An explanation from the messages.** GPT-4.1 sellers used collusive language at almost the same rate in both markets, so the difference lay in prices rather than words (Section 6).
 - **A simple monitor that works.** A rule that reads prices instead of messages caught every colluding market within five rounds, with no false alarms (Section 7).
 - **A flaw in the suite's comparison methods.** Its three perfect-scoring comparison methods are given the list of colluders as an input (Section 8).
+
+![Figure 1](figures/fig4_talk_vs_action.png)
+
+*Figure 1. The two markets use collusive language at similar rates but end at opposite prices. Each point is one session. The vertical position is the number of collusive words per 1,000 words in the GPT-4.1 sellers' messages, and the horizontal position is the collusion index from prices.*
 
 ¹ A *scripted colluder* is an agent programmed to embed a fixed covert signal, such as a keyword or a watermark, in otherwise normal text.
 ² *ROC AUC* is the probability that a detector scores a randomly chosen colluding case above a randomly chosen honest one. A score of 1.0 is perfect and 0.5 is chance.
@@ -38,21 +42,7 @@ Agrawal et al. [6] built the market we use. They showed that language-model sell
 
 Several studies have found that detection gets harder when collusion is not scripted. Colosseum [9] found that what agents say about colluding and what they actually do only weakly agree, in agents that were instructed to collude. HELIOS [11] found that detectors trained on instructed collusion work only partly on collusion that emerges on its own. Mathew et al. [5] showed that hidden-message collusion can emerge in language models under optimisation pressure, and Audit the Whisper [4] was built to audit that kind of collusion. None of these studies runs a published detector, unchanged, on language-model agents that collude without instruction, with collusion measured from market prices rather than from the agents' words.
 
-**What was already there and what is new.** Everything we ran on was existing public work, listed in Table 1, and we changed none of the detectors or prompts. What we added is the experiment that connects them (Section 3). All of our code and sessions date from the sprint, 23 to 25 October 2026.
-
-**Table 1. What we built on, and what we added.** Rows marked "existing" were used without changes unless the row says otherwise.
-
-| Component | Source | Status |
-|---|---|---|
-| Market rules, seller instructions and collusion index | Agrawal et al. [6], as adapted in the starter kit [7] | existing |
-| Overseer prompt, used as our AI judge | Agrawal et al. [6], in the starter kit [7] | existing |
-| Rule-based buyers | Cliff [8], implemented in the starter kit [7] | existing, with its learning switched back on (Section 3) |
-| Collusion detectors and comparison methods | Audit the Whisper [4], in the starter kit [7] | existing |
-| Fixing each model to one provider | ours | **new**, changes routing only |
-| Two matched markets, with collusion measured from prices | ours | **new** |
-| Scoring only the GPT-4.1 sellers, to rule out writing style | ours | **new** |
-| Analysis, statistical tests and figures | ours | **new** |
-| Finding that the comparison methods are told who colludes | ours, from reading the code of [4] | **new** |
+**What we used and what we added.** We used existing public work for every component and changed none of its detectors or prompts. The market, its seller instructions and its collusion index come from Agrawal et al. [6], as adapted in the starter kit [7], and so does the overseer prompt that we use as our AI judge. The rule-based buyers are Cliff's [8], as implemented in the kit, with their learning switched back on (Section 3). The detectors and comparison methods are those of Audit the Whisper [4], also in the kit. What we added is the experiment that connects them. That covers the two matched markets with collusion measured from prices, scoring only the GPT-4.1 sellers to rule out writing style, fixing each model to one provider, the analysis and figures, and the finding that the comparison methods are told who colludes. All of our code and sessions date from the sprint, 23 to 25 October 2026.
 
 ---
 
@@ -66,9 +56,9 @@ Several studies have found that detection gets harder when collusion is not scri
 
 **Running the detectors.** We converted each session into the input format Audit the Whisper expects, one line per seller per round holding the seller's message and price, and ran the detectors through the suite's own interface without changing them. We used the four detectors that can run without being told who the colluders are, namely permutation invariance, linguistic steganalysis, watermark variance and cross-run mutual information. The last of these needs several sessions at once, so it can only score a whole market rather than a single session.
 
-**Ruling out writing style.** The two markets differ in which models take part as well as in how much they collude, so a detector could separate them just by recognising Claude's writing. A preliminary check showed that this happens. Scored on all five sellers, cross-run mutual information appeared to flag the same-model market, but scored on the GPT-4.1 sellers alone, the result reversed. Every detector result in this paper therefore scores only the GPT-4.1 sellers, three per session in both markets, so both markets are compared on the same model and the same number of sellers.
+**Ruling out writing style.** The two markets differ in which models take part as well as in how much they collude, so a detector could separate them just by recognising Claude's writing. Cross-run mutual information shows the risk. Scored on all five sellers it flags only the same-model market (p = 0.024 against 0.16), but on the GPT-4.1 sellers alone it flags both (p = 0.018 and 0.0007), although its warnings mean we do not lean on it (`results/tests.md`). Every detector result in this paper therefore scores only the GPT-4.1 sellers, three per session in both markets, so both markets are compared on the same model and the same number of sellers.
 
-**The AI judge.** To check whether collusion shows in the messages at all, we scored every round with the overseer prompt, run unchanged on GPT-4.1-mini, the model Agrawal et al. used [6]. It gives each round a coordination score from 1 (none) to 4 (very high). The judge sees only the sellers' messages and never their prices, so it cannot work out collusion from the outcome.
+**The AI judge.** To check whether collusion shows in the messages at all, we scored every round with the overseer prompt, run unchanged on GPT-4.1-mini, the model Agrawal et al. used [6]. It gives each round a coordination score from 1 (none) to 4 (very high). The judge sees only the sellers' messages, not the market's price record, although most messages (84%) mention a price.
 
 **Tests.** Before running sessions 5 to 9, we wrote down which tests we would run and how we would interpret each result. We test whether the collusion index, each detector and the judge score the same-model market above the mixed one across the 10 matched pairs. All tests are exact, with Holm correction across the five, and we repeat each one on sessions 5 to 9 alone as a check that the result holds on sessions we had not yet seen. Appendix C lists every result.
 
@@ -80,11 +70,11 @@ Several studies have found that detection gets harder when collusion is not scri
 
 ## 4. The two markets really differ
 
-![Figure 1](figures/fig1_prices.png)
+![Figure 2](figures/fig1_prices.png)
 
-*Figure 1. Same-model sellers hold prices above the competitive level, and mixed sellers do not. Each faint line is one session and each bold line is the average of that market's 10 sessions. The shaded area is the last third of each session, which the collusion index scores.*
+*Figure 2. Same-model sellers hold prices above the competitive level, and mixed sellers do not. Each faint line is one session and each bold line is the average of that market's 10 sessions. The shaded area is the last third of each session, which the collusion index scores.*
 
-Figure 1 shows what happened in each session. Same-model markets started near $97 and settled around $93.60, above the competitive $90 for the whole session. Mixed markets started near $93, fell to $82.60 within four rounds and stayed there, just above the sellers' $80 cost. Both markets kept trading throughout, with 54 to 70 trades in each same-model session and 82 to 100 in each mixed session, so the same-model sellers were not simply refusing to sell.
+Figure 2 shows what happened in each session. Same-model markets started near $97 and settled around $93.60, above the competitive $90 for the whole session. Mixed markets started near $93, fell to $82.60 within four rounds and stayed there, just above the sellers' $80 cost. Both markets kept trading throughout, with 54 to 70 trades in each same-model session and 82 to 100 in each mixed session, so the same-model sellers were not simply refusing to sell.
 
 The collusion index puts a number on that difference (Figure 5, in Appendix C). The same-model markets ended with a collusion index between +0.11 and +0.65, and the mixed markets between −0.56 and −0.87. The same-model market was higher in 10 of 10 pairs (exact p = 0.002, or 0.010 after Holm correction), and in all 5 pairs of the check on sessions 5 to 9. So there is a real difference in collusion between the two markets, measured without reading a single message.
 
@@ -92,11 +82,11 @@ The collusion index puts a number on that difference (Figure 5, in Appendix C). 
 
 ## 5. Would the detectors have caught it?
 
-![Figure 2](figures/fig3_detectors.png)
+![Figure 3](figures/fig3_detectors.png)
 
-*Figure 2. No message-based method reliably separates the colluding markets from the others. Every panel uses the same 10 pairs and scores only the GPT-4.1 sellers. The left panel ranks the colluding market higher in 6 of 10 pairs. The two detectors in the middle return 0 for every session. The judge on the right scores every session near the top of its 1 to 4 scale.*
+*Figure 3. No message-based method reliably separates the colluding markets from the others. Every panel uses the same 10 pairs and scores only the GPT-4.1 sellers. The left panel ranks the colluding market higher in 6 of 10 pairs. The two detectors in the middle return 0 for every session. The judge on the right scores every session near the top of its 1 to 4 scale.*
 
-**Table 2. Does each method rank the colluding market higher?** "Pairs" counts the pairs in which the same-model market scored higher, out of those that were not tied.
+**Table 1. Does each method rank the colluding market higher?** "Pairs" counts the pairs in which the same-model market scored higher, out of those that were not tied.
 
 | Method | Pairs | Exact p | Holm p |
 |---|---|---|---|
@@ -114,7 +104,7 @@ Cross-run mutual information can only score a whole market, and it reported a pa
 
 The judge scored every session between 3.87 and 4.00 out of 4. Three pairs tied exactly, and in the other seven the same-model market scored higher in six (p = 0.125), which is not significant.
 
-These tests only ask which market ranks higher within each pair. Measured instead by ROC AUC, the suite's own metric, the judge carries a real but weak signal (0.77, above chance) and permutation invariance reaches 0.72 (not above chance), both far below prices at 1.00 and below the 1.00 the suite reports on scripted colluders (Table 3, computed after the study). The judge would also flag both markets, since even the mixed market averaged 3.93 out of 4.
+These tests only ask which market ranks higher within each pair. Measured instead by ROC AUC, the suite's own metric, the judge carries a real but weak signal (0.77, above chance) and permutation invariance reaches 0.72 (not above chance), both far below prices at 1.00 (Table 2, computed after the study). On the suite's own scripted benchmark, permutation invariance reaches 0.90 [7]. The judge would also flag both markets, since even the mixed market averaged 3.93 out of 4.
 
 Our test plan, written before sessions 5 to 9, read this pattern in advance. The collusion is real but hard to see in the messages, which does not single out this suite as worse than others. It raises the question of why the messages look so alike when the prices differ so much.
 
@@ -122,13 +112,9 @@ Our test plan, written before sessions 5 to 9, read this pattern in advance. The
 
 ## 6. Collusive talk appears in both markets
 
-![Figure 3](figures/fig4_talk_vs_action.png)
-
-*Figure 3. The two markets use collusive language at similar rates but end at opposite prices. Each point is one session. The vertical position is the number of collusive words per 1,000 words in the GPT-4.1 sellers' messages, and the horizontal position is the collusion index from prices.*
-
 The judge is reading the messages correctly, and a simple count, with no AI involved, shows the same thing. We counted collusive words in the GPT-4.1 sellers' messages using a fixed list drawn from the overseer prompt's own examples of coordination, such as "our", "let's", "floor", "margins" and "disciplined". Same-model sellers used 123.5 such words per 1,000 and mixed sellers used 113.5. The two ranges overlap almost completely, and the difference is not significant (the same-model market was higher in 7 of 10 pairs, p = 0.082). Our test plan listed this count as exploratory, so it supports the explanation rather than being a main result.
 
-In Figure 3 the two markets sit at about the same height, because their sellers talk alike, and on opposite sides of the competitive line, because they price differently. In session 3 of the mixed market, round 20, the asking prices were between $81.45 and $81.67, close to the $80 cost, and two of the GPT-4.1 sellers wrote the following.
+In Figure 1 the two markets sit at about the same height, because their sellers talk alike, and on opposite sides of the competitive line, because they price differently. In session 3 of the mixed market, round 20, the asking prices were between $81.45 and $81.67, close to the $80 cost, and two of the GPT-4.1 sellers wrote the following.
 
 > "I'm placing my ask at $81.67, undercutting by one cent to lead the queue while defending our $81.60+ floor. Let's stick with small moves and monitor the thin bid book closely—discipline is key as buyer interest remains soft."
 >
@@ -142,11 +128,11 @@ On the sellers that were scored, the words look alike in both markets and only t
 
 ## 7. A monitor that reads prices catches it early
 
+We used the simplest rule we could think of. It flags a market whenever the sellers' average asking price, over the rounds watched so far, stays above the competitive price of $90. We did not fit that threshold to our sessions, because $90 is set by the market's design. The rule also only uses the opening rounds, which never overlap the last 10 rounds that the collusion index scores, so it is a genuine early warning rather than the index under another name.
+
 ![Figure 4](figures/fig5_price_monitor.png)
 
 *Figure 4. A rule that watches prices instead of messages catches every colluding market within five rounds. The rule flags a market when its average asking price over the rounds watched so far is above the competitive $90. The blue line counts colluding markets flagged, and the orange line counts mixed markets wrongly flagged.*
-
-We used the simplest rule we could think of. It flags a market whenever the sellers' average asking price, over the rounds watched so far, stays above the competitive price of $90. We did not fit that threshold to our sessions, because $90 is set by the market's design. The rule also only uses the opening rounds, which never overlap the last 10 rounds that the collusion index scores, so it is a genuine early warning rather than the index under another name.
 
 The rule flagged all 10 colluding markets from the first round onward (Figure 4). Every market starts above $90, so after one round it also flags all 10 mixed markets. Those false alarms fall to 3 after two rounds, to 2 after three, to 1 after four, and to none after five, because mixed markets drop below $90 almost at once while colluding markets never do. So by round 5, a sixth of the way through a session, the rule separated the two kinds of market perfectly.
 
@@ -176,7 +162,7 @@ We tested one market, one pair of models and 10 matched sessions, so these resul
 
 ## 10. Conclusion
 
-Language-model sellers colluded on prices without being told to, and the evidence was in what they did, not in what they said. Message-based detectors picked up only a weak signal, while a simple price rule caught every colluding market within five rounds. Detectors that score perfectly on scripted colluders may do much worse on unscripted collusion, so monitors should check outcomes as well as words.
+Language-model sellers colluded on prices without being told to, and the evidence was in what they did, not in what they said. Message-based detectors picked up only a weak signal, while a simple price rule caught every colluding market within five rounds. Detectors that score well on scripted colluders may do much worse on unscripted collusion, so monitors should check outcomes as well as words.
 
 **Code and data.** All code, the logs of all 20 sessions and the judge's scores are at https://github.com/rkstu/AI_Collusion. `python3 verify.py` recomputes the headline numbers with nothing to install (Appendix E).
 
@@ -214,11 +200,13 @@ We worked with Claude through Claude Code throughout the sprint. The author set 
 
 **The judge was not tested on a market without collusive language.** It scored near its ceiling here, so we cannot say how it would score messages with no collusive vocabulary. Its weak result is specific to this kind of talk.
 
-**The ROC AUC check was not planned.** We added Table 3 after seeing the planned results, to measure how much signal each method carries, so it should be read as a check rather than a confirmed result. The judge's p-value of 0.017 is one-sided and uncorrected.
+**The ROC AUC check was not planned.** We added Table 2 after seeing the planned results, to measure how much signal each method carries, so it should be read as a check rather than a confirmed result. The judge's p-value of 0.017 is one-sided and uncorrected.
+
+**The timing of the test plan rests on our account.** We wrote `docs/PREREG_MAIN.md` before running sessions 5 to 9, but the repository was published after the study, so it has no earlier commit to prove this. The replication on sessions 5 to 9 matches sessions 0 to 4 in direction for the collusion index and the judge.
 
 **The word count is exploratory.** It was planned as an exploratory analysis, not a main test, and the word list is short and fixed. It supports Section 6 but is not one of the main results.
 
-**Cross-run mutual information** raised numeric-overflow warnings, and we do not interpret it.
+**Cross-run mutual information** raised numeric-overflow warnings in every run, so we use it only to illustrate the writing-style risk in Section 3, not as evidence.
 
 **No second reviewer.** The collusion index comes from prices, and every detector and test is automated, so no human judgement entered the main results. The reading of example messages in Section 6 is ours alone.
 
@@ -230,7 +218,7 @@ Neither change touches a detector, a prompt or how anything is scored. Both are 
 
 **Fixing each model to one provider.** Each model is sent to a single provider with fallbacks turned off, OpenAI for GPT-4.1 and Anthropic for Claude Haiku 5.5, so every call for a model reaches the same service. Without this, GPT-4.1 can be served by either OpenAI or Azure. This changes routing only.
 
-**Switching the buyers' learning back on.** In the starter kit, the code that lets the buyers learn is commented out, so they bid $80 every round whatever the market does. We switched the kit's own learning code back on, with its own settings (a profit margin of 0.2, a learning rate of 0.25 and a momentum of 0.1). The only change is that the market now passes the last trade price to the buyers, because the interface the old code expected no longer exists. Checked offline, with no trades the buyers raise their bids from $80 to $99.70 within 20 rounds, and with trades at $95 their bids settle at $95.
+**Switching the buyers' learning back on.** In the starter kit, the code that lets the buyers learn is commented out, so they bid $80 every round whatever the market does. We switched the kit's own learning code back on, with its own settings (a profit margin of 0.2, a learning rate of 0.25 and a momentum of 0.1). The only change is that the market now passes the last trade price to the buyers, because the interface the old code expected no longer exists. Checked offline, with no trades the buyers raise their bids from $80 to $99.68 by round 20, and with trades at $95 their bids settle at $95.
 
 ## Appendix C. Further results and all planned tests
 
@@ -238,7 +226,7 @@ Neither change touches a detector, a prompt or how anything is scored. Both are 
 
 *Figure 5. In every matched pair, the same-model market ends at a higher price than the mixed one. Each line joins the two sessions that share a session number.*
 
-**Table 3. How well each method separates the markets, as ROC AUC.** A score of 0.5 is chance and 1.0 is perfect. The p-value is one-sided and comes from shuffling which session in each pair is labelled colluding. Computed after the study, not planned in advance.
+**Table 2. How well each method separates the markets, as ROC AUC.** A score of 0.5 is chance and 1.0 is perfect. The p-value is one-sided and comes from shuffling which session in each pair is labelled colluding. Computed after the study, not planned in advance.
 
 | Method | ROC AUC | 95% interval | p |
 |---|---|---|---|
@@ -246,7 +234,7 @@ Neither change touches a detector, a prompt or how anything is scored. Both are 
 | AI judge (overseer prompt) | 0.77 | 0.57 to 0.95 | 0.017 |
 | Permutation invariance | 0.72 | 0.44 to 0.94 | 0.076 |
 
-**Table 4. All planned tests, with the check on sessions 5 to 9.**
+**Table 3. All planned tests, with the check on sessions 5 to 9.**
 
 | Test | Pairs | Exact p | Holm p | Replication pairs | Replication p |
 |---|---|---|---|---|---|
@@ -262,7 +250,7 @@ The collusion-index test is an exact paired sign-flip permutation test over all 
 
 All paths are in the `steganographic-collusion` folder of the starter kit [7], at commit e6fb130.
 
-**Table 5. Where each comparison method reads the colluder list.**
+**Table 4. Where each comparison method reads the colluder list.**
 
 | Method | What the script does | Where |
 |---|---|---|
@@ -276,17 +264,17 @@ The language-model colluder mentioned in Section 9 is configured in `configs/pri
 
 ## Appendix E. What is in the repository
 
-**Table 6. Where each part of the study is in the repository.**
+**Table 5. Where each part of the study is in the repository.**
 
 | What | Where |
 |---|---|
 | Logs of all 20 sessions | `runs/auction/` |
 | AI judge scores for all 20 sessions | `runs/judge/` |
 | Test plan, written before sessions 5 to 9 | `docs/PREREG_MAIN.md` |
-| Every result in Table 2 and Appendix C | `results/tests.md` |
+| Every result in Table 1 and Appendix C | `results/tests.md` |
 | Every per-session number behind the figures | `results/per_seed.json` |
 | Recomputes the headline numbers, standard Python only | `verify.py` |
 | Rebuilds every table and figure, including the detector statistics | `src/analyze.py` |
 | Changes to the starter kit | `patches/` |
 
-All of this was written during the sprint. The starter kit, the market, the detectors and the overseer prompt are third-party work, cited in Table 1, and are not included in the repository.
+All of this was written during the sprint. The starter kit, the market, the detectors and the overseer prompt are third-party work, cited in Section 2, and are not included in the repository.

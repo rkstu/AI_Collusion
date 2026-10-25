@@ -62,7 +62,7 @@ The markets are simulated, with no real trades. A result showing that these dete
 
 ## Licence and citation
 
-Code is under the MIT License (`LICENSE`). The session logs, judge scores and results are under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). The logs contain text generated through the OpenAI and Anthropic APIs, which those providers' terms allow us to share. The starter kit keeps its own licences.
+Code is under the MIT License (`LICENSE`). The session logs, judge scores, results and report are under CC-BY-4.0 (`LICENSE-CC-BY-4.0.txt`). The logs contain text generated through the OpenAI and Anthropic APIs, which those providers' terms allow us to share. The starter kit keeps its own licences.
 
 ```
 Kumar, R. (2026). Talk Is Not Collusion. Do published collusion detectors catch LLM agents
